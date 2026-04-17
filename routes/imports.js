@@ -37,8 +37,6 @@ var Instruments = require('../lib/tools/instruments.js')
 
 var mimelib = require('mimelib')
 
-var phantom = require('phantom')
-
 var rp = require('request-promise')
 var cheerio = require('cheerio')
 
@@ -1233,6 +1231,10 @@ exports.submit = function(req, res, next) {
         })
 
         function submitRelations(req, res, searchQuery) {
+            try { var phantom = require('phantom') } catch(e) {
+                res.error('Google Scholar import is not available in this environment.')
+                return res.redirect('back')
+            }
             phantom.create(function(ph) {
                 ph.createPage(function(page) {
                     page.set(
@@ -2316,7 +2318,10 @@ exports.submit = function(req, res, next) {
             }
         })
     } else if (service == 'youtube') {
-        var youtubedl = require('youtube-dl')
+        try { var youtubedl = require('youtube-dl') } catch(e) {
+            res.error('YouTube subtitle import is not available in this environment.')
+            return res.redirect('back')
+        }
 
         var statements = []
 
