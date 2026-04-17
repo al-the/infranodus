@@ -28,16 +28,12 @@ var Evernote = require('evernote')
 
 var S = require('string')
 
-var config = require('../config.json')
-
 var Imap = require('imap'),
     inspect = require('util').inspect
 
 var Instruments = require('../lib/tools/instruments.js')
 
 var mimelib = require('mimelib')
-
-var phantom = require('phantom')
 
 var rp = require('request-promise')
 var cheerio = require('cheerio')
@@ -59,38 +55,38 @@ var max_file_length = options.settings.max_file_length
 const https = require('https');
 
 // This is for PDF reader
-global.navigator = {
-    userAgent: 'node',
-}
-
-window.navigator = {
-    userAgent: 'node',
+global.navigator = { userAgent: 'node' }
+if (typeof window !== 'undefined') {
+    window.navigator = { userAgent: 'node' }
 }
 
 var pdfreader = require('pdfreader')
 
 // Lemmatizer module initialization
-const Morphy = require('phpmorphy-locutus').default
+var lemmerEng = null
+var lemmerRus = null
 
-const lemmerEng = new Morphy('en', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
-
-const lemmerRus = new Morphy('ru', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
+try {
+    const Morphy = require('phpmorphy-locutus').default
+    lemmerEng = new Morphy('en', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+    lemmerRus = new Morphy('ru', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+} catch (e) {
+    console.log('phpmorphy-locutus unavailable in imports:', e.message)
+}
 
 // Keeping them here as they are useful libs for future use
 
@@ -98,12 +94,17 @@ const lemmerRus = new Morphy('ru', {
 //var cheerio = require('cheerio'); // for content extraction  from html pages
 //var validator = require('validator'); // to validate encodings, emails, numbers
 
-var T = new Twit({
-    consumer_key: config.twitter.consumer_key,
-    consumer_secret: config.twitter.consumer_secret,
-    access_token: config.twitter.access_token,
-    access_token_secret: config.twitter.access_token_secret,
-})
+var T = null
+try {
+    T = new Twit({
+        consumer_key: options.twitter.consumer_key,
+        consumer_secret: options.twitter.consumer_secret,
+        access_token: options.twitter.access_token,
+        access_token_secret: options.twitter.access_token_secret,
+    })
+} catch (e) {
+    console.log('Twitter client unavailable:', e.message)
+}
 
 // GET request to the /settings page (view settings)
 
@@ -210,7 +211,7 @@ exports.renderEvernote = function(req, res) {
     if (req.session.oauthAccessToken) {
         var client = new Evernote.Client({
             token: req.session.oauthAccessToken,
-            sandbox: config.evernote.SANDBOX,
+            sandbox: options.evernote ? options.evernote.SANDBOX : true,
         })
 
         var noteStore = client.getNoteStore()
@@ -733,7 +734,7 @@ exports.submit = function(req, res, next) {
 
         var client = new Evernote.Client({
             token: req.session.oauthAccessToken,
-            sandbox: config.evernote.SANDBOX,
+            sandbox: options.evernote ? options.evernote.SANDBOX : true,
         })
 
         console.log(req.session.oauthAccessToken)
@@ -1233,6 +1234,10 @@ exports.submit = function(req, res, next) {
         })
 
         function submitRelations(req, res, searchQuery) {
+            try { var phantom = require('phantom') } catch(e) {
+                res.error('Google Scholar import is not available in this environment.')
+                return res.redirect('back')
+            }
             phantom.create(function(ph) {
                 ph.createPage(function(page) {
                     page.set(
@@ -2316,7 +2321,10 @@ exports.submit = function(req, res, next) {
             }
         })
     } else if (service == 'youtube') {
-        var youtubedl = require('youtube-dl')
+        try { var youtubedl = require('youtube-dl') } catch(e) {
+            res.error('YouTube subtitle import is not available in this environment.')
+            return res.redirect('back')
+        }
 
         var statements = []
 

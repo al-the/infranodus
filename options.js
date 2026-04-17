@@ -68,23 +68,11 @@ exports.defaultstatements = {
 if (fs.existsSync(configPath)) {
     var parsed = JSON.parse(fs.readFileSync(configPath, 'UTF-8'))
 
-    // Create Neo4J access URL
-    exports.neo4jlink =
-        'http://' +
-        parsed['neo4j']['username'] +
-        ':' +
-        parsed['neo4j']['password'] +
-        '@' +
-        parsed['neo4j']['host']
-
-    exports.neo4jhost = 'bolt://' + parsed['neo4j']['bolt']
-
-    exports.neo4juser = parsed['neo4j']['username']
-    exports.neo4jpass = parsed['neo4j']['password']
+    exports.mongodbUri = parsed['mongodb']['uri']
+    exports.mongodbName = parsed['mongodb']['database'] || 'infranodus'
 
     exports.invite = parsed['secrets']['invitation']
     exports.cookie_secret = parsed['secrets']['cookie_secret']
-
 
     exports.default_user = parsed['infranodus']['default_user']
 
@@ -93,13 +81,46 @@ if (fs.existsSync(configPath)) {
     exports.chargebee.api_key = parsed['chargebee']['api_key']
     exports.chargebee.redirect_url = parsed['chargebee']['redirect_url']
 
+    exports.evernote = parsed['evernote'] || null
+    exports.twitter = parsed['twitter'] || {}
+    exports.google = parsed['google'] || {}
+    exports.smtpOptions = parsed['smtpOptions'] || {}
+    exports.mailOptions = parsed['mailOptions'] || {}
+    exports.domain = parsed['infranodus'] ? parsed['infranodus']['domain'] : 'localhost:3000'
+
     exports.rssPresets = parsed['rss_presets']
 } else {
-    console.log("Neo4J config file doesn't exist. Using default settings.")
+    console.log("Config file doesn't exist. Using environment variables or default settings.")
 
-    exports.neo4jlink = 'http://localhost:7474'
+    exports.mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017'
+    exports.mongodbName = process.env.MONGODB_DATABASE || 'infranodus'
 
-    exports.invite = ''
+    exports.invite = process.env.INVITE_CODE || ''
+    exports.cookie_secret = process.env.COOKIE_SECRET || 'changeme-set-COOKIE_SECRET-env-var'
+    exports.default_user = process.env.DEFAULT_USER || ''
+
+    exports.chargebee = {
+        site: process.env.CHARGEBEE_SITE || '',
+        api_key: process.env.CHARGEBEE_API_KEY || '',
+        redirect_url: process.env.CHARGEBEE_REDIRECT_URL || ''
+    }
+
+    exports.evernote = null
+    exports.twitter = {
+        consumer_key: process.env.TWITTER_CONSUMER_KEY || '',
+        consumer_secret: process.env.TWITTER_CONSUMER_SECRET || '',
+        access_token: process.env.TWITTER_ACCESS_TOKEN || '',
+        access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET || ''
+    }
+    exports.google = {
+        URL_search: process.env.GOOGLE_SEARCH_URL || '',
+        API_key: process.env.GOOGLE_API_KEY || ''
+    }
+    exports.smtpOptions = {}
+    exports.mailOptions = {}
+    exports.domain = process.env.INFRANODUS_DOMAIN || 'localhost:3000'
+
+    exports.rssPresets = []
 }
 
 // Get a list of stopwords for English

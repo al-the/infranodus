@@ -41,7 +41,6 @@ var http = require('http')
 var path = require('path')
 
 var bodyParser = require('body-parser')
-var favicon = require('serve-favicon')
 var morgan = require('morgan')
 var session = require('express-session')
 var cookieParser = require('cookie-parser')
@@ -52,7 +51,7 @@ var serveStatic = require('serve-static')
 var multer = require('multer')
 var storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, './tmp');
+        cb(null, '/tmp');
      },
     filename: function (req, file, cb) {
         cb(null , file.originalname);
@@ -80,7 +79,6 @@ app.set('port', process.env.PORT || 3000)
 app.set('views',  __dirname + '/views')
 app.set('view engine', 'ejs')
 
-app.use(favicon(path.join(__dirname, 'public/images', 'favicon-32x32.png')))
 app.use(methodOverride())
 
 app.use(session({
@@ -101,6 +99,8 @@ app.use(serveStatic(path.join(__dirname, 'public')));
 app.use(passport.initialize())
 app.use(passport.session())
 
+
+app.get('/favicon.ico', function(req, res) { res.status(204).end() })
 
 app.get('/', main.render)
 
@@ -310,9 +310,13 @@ if (process.env.ERROR_ROUTE) {
     })
 }
 
-server.listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'))
-})
+if (require.main === module) {
+    server.listen(app.get('port'), function() {
+        console.log('Express server listening on port ' + app.get('port'))
+    })
+}
+
+module.exports = app
 
 // could be var chat = to make it recursive
 
