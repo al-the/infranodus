@@ -66,27 +66,30 @@ window.navigator = {
 var pdfreader = require('pdfreader')
 
 // Lemmatizer module initialization
-const Morphy = require('phpmorphy-locutus').default
+var lemmerEng = null
+var lemmerRus = null
 
-const lemmerEng = new Morphy('en', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
-
-const lemmerRus = new Morphy('ru', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
+try {
+    const Morphy = require('phpmorphy-locutus').default
+    lemmerEng = new Morphy('en', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+    lemmerRus = new Morphy('ru', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+} catch (e) {
+    console.log('phpmorphy-locutus unavailable in imports:', e.message)
+}
 
 // Keeping them here as they are useful libs for future use
 
