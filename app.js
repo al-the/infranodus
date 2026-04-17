@@ -41,7 +41,6 @@ var http = require('http')
 var path = require('path')
 
 var bodyParser = require('body-parser')
-var favicon = require('serve-favicon')
 var morgan = require('morgan')
 var session = require('express-session')
 var cookieParser = require('cookie-parser')
@@ -80,7 +79,6 @@ app.set('port', process.env.PORT || 3000)
 app.set('views',  __dirname + '/views')
 app.set('view engine', 'ejs')
 
-app.use(favicon(path.join(__dirname, 'public/images', 'favicon-32x32.png')))
 app.use(methodOverride())
 
 app.use(session({
