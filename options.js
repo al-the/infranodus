@@ -95,11 +95,24 @@ if (fs.existsSync(configPath)) {
 
     exports.rssPresets = parsed['rss_presets']
 } else {
-    console.log("Neo4J config file doesn't exist. Using default settings.")
+    console.log("Neo4J config file doesn't exist. Using environment variables or default settings.")
 
-    exports.neo4jlink = 'http://localhost:7474'
+    exports.neo4jlink = process.env.NEO4J_LINK || 'http://localhost:7474'
+    exports.neo4jhost = process.env.NEO4J_BOLT || 'bolt://localhost:7687'
+    exports.neo4juser = process.env.NEO4J_USER || 'neo4j'
+    exports.neo4jpass = process.env.NEO4J_PASSWORD || ''
 
-    exports.invite = ''
+    exports.invite = process.env.INVITE_CODE || ''
+    exports.cookie_secret = process.env.COOKIE_SECRET || 'changeme-set-COOKIE_SECRET-env-var'
+    exports.default_user = process.env.DEFAULT_USER || ''
+
+    exports.chargebee = {
+        site: process.env.CHARGEBEE_SITE || '',
+        api_key: process.env.CHARGEBEE_API_KEY || '',
+        redirect_url: process.env.CHARGEBEE_REDIRECT_URL || ''
+    }
+
+    exports.rssPresets = []
 }
 
 // Get a list of stopwords for English

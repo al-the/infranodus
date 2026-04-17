@@ -52,7 +52,7 @@ var serveStatic = require('serve-static')
 var multer = require('multer')
 var storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, './tmp');
+        cb(null, '/tmp');
      },
     filename: function (req, file, cb) {
         cb(null , file.originalname);
@@ -310,9 +310,13 @@ if (process.env.ERROR_ROUTE) {
     })
 }
 
-server.listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'))
-})
+if (require.main === module) {
+    server.listen(app.get('port'), function() {
+        console.log('Express server listening on port ' + app.get('port'))
+    })
+}
+
+module.exports = app
 
 // could be var chat = to make it recursive
 
