@@ -68,23 +68,11 @@ exports.defaultstatements = {
 if (fs.existsSync(configPath)) {
     var parsed = JSON.parse(fs.readFileSync(configPath, 'UTF-8'))
 
-    // Create Neo4J access URL
-    exports.neo4jlink =
-        'http://' +
-        parsed['neo4j']['username'] +
-        ':' +
-        parsed['neo4j']['password'] +
-        '@' +
-        parsed['neo4j']['host']
-
-    exports.neo4jhost = 'bolt://' + parsed['neo4j']['bolt']
-
-    exports.neo4juser = parsed['neo4j']['username']
-    exports.neo4jpass = parsed['neo4j']['password']
+    exports.mongodbUri = parsed['mongodb']['uri']
+    exports.mongodbName = parsed['mongodb']['database'] || 'infranodus'
 
     exports.invite = parsed['secrets']['invitation']
     exports.cookie_secret = parsed['secrets']['cookie_secret']
-
 
     exports.default_user = parsed['infranodus']['default_user']
 
@@ -95,12 +83,10 @@ if (fs.existsSync(configPath)) {
 
     exports.rssPresets = parsed['rss_presets']
 } else {
-    console.log("Neo4J config file doesn't exist. Using environment variables or default settings.")
+    console.log("Config file doesn't exist. Using environment variables or default settings.")
 
-    exports.neo4jlink = process.env.NEO4J_LINK || 'http://localhost:7474'
-    exports.neo4jhost = process.env.NEO4J_BOLT || 'bolt://localhost:7687'
-    exports.neo4juser = process.env.NEO4J_USER || 'neo4j'
-    exports.neo4jpass = process.env.NEO4J_PASSWORD || ''
+    exports.mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017'
+    exports.mongodbName = process.env.MONGODB_DATABASE || 'infranodus'
 
     exports.invite = process.env.INVITE_CODE || ''
     exports.cookie_secret = process.env.COOKIE_SECRET || 'changeme-set-COOKIE_SECRET-env-var'

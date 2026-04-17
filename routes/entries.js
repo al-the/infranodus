@@ -19,8 +19,6 @@ var validate = require('../lib/middleware/validate')
 var options = require('../options')
 var async = require('async')
 
-var neo4jnew = require('neo4j-driver').v1
-
 var uuid = require('node-uuid')
 
 exports.list = function(req, res, next) {
@@ -198,10 +196,6 @@ exports.submit = function(req, res, next) {
 
     var entryName = ''
 
-    var neo4jdriver = neo4jnew.driver(
-        options.neo4jhost,
-        neo4jnew.auth.basic(options.neo4juser, options.neo4jpass)
-    )
 
     // A series of checks before the statement is submitted
     async.waterfall(
@@ -393,30 +387,12 @@ exports.submit = function(req, res, next) {
                     // res.redirect('back');
                 }
             } else {
-                entry.savetrans(function(cypherQuery) {
-                    var firstanswer = {
-                        data: [],
-                    }
-                    var jsonfirstanswer = ''
+                entry.savetrans(function(err, result) {
+                    var jsonfirstanswer = result ? JSON.stringify({ data: result.uid }) : '{}'
 
-                    var session = neo4jdriver.session()
-                    session
-                        .run(cypherQuery.query, cypherQuery.params)
-                        .then(function(result) {
-                            result.records.forEach(function(record) {
-                                // Change that so we can add multiple statements at once without reloading the page
-                                firstanswer.data = record.get('s.uid')
-                                jsonfirstanswer = JSON.stringify(firstanswer)
-                            })
-                            session.close()
-
-                            if (req.remoteUser) {
-                                res.json({ message: 'Entry added.' })
-                            } else if (req.internal) {
-                                // next();
-
-                                // This was some import or multiple statements add feature and we just reload the page with results
-                                neo4jdriver.close();
+                    if (req.remoteUser) {
+                        res.json({ message: 'Entry added.' })
+                    } else if (req.internal) {
 
                                 // This is a bit of a workaround, it shows a newly added graph on top of the previous one highlighting the difference
                                 // Happens in case of Google search for example
@@ -518,7 +494,6 @@ exports.submit = function(req, res, next) {
 
                                                 // Change the result we obtained into a nice json we need
                                                 // TODO eventually could be several statements sent this way so no need to reload the graph
-                                                neo4jdriver.close()
                                                 res.send({
                                                     entryuid: jsonfirstanswer,
                                                     entryname: entryName,
@@ -534,7 +509,6 @@ exports.submit = function(req, res, next) {
                                     // The statement consists of several statements and we completed all the iterations.
                                     else {
                                         console.log('reached the end')
-                                        neo4jdriver.close()
                                         res.send({
                                             entryuid: 'multiple',
                                             entrycontent: fullstatement,
@@ -544,20 +518,6 @@ exports.submit = function(req, res, next) {
                                     }
                                 }
                             }
-                        })
-                        .catch(function(error) {
-                            if (req.internal) {
-                                // TODO Error treatment?
-                            } else {
-                                return next(error)
-                            }
-                            console.log(error)
-                        })
-                    // End of FOR cycle
-
-                    // End of KEEP THIS BELOW TRANSACTION QUERY IF condition
-                    // }
-
                     // savetrans ends here
                 })
             }
