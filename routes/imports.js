@@ -55,12 +55,9 @@ var max_file_length = options.settings.max_file_length
 const https = require('https');
 
 // This is for PDF reader
-global.navigator = {
-    userAgent: 'node',
-}
-
-window.navigator = {
-    userAgent: 'node',
+global.navigator = { userAgent: 'node' }
+if (typeof window !== 'undefined') {
+    window.navigator = { userAgent: 'node' }
 }
 
 var pdfreader = require('pdfreader')
