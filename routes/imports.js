@@ -94,12 +94,17 @@ try {
 //var cheerio = require('cheerio'); // for content extraction  from html pages
 //var validator = require('validator'); // to validate encodings, emails, numbers
 
-var T = new Twit({
-    consumer_key: options.twitter.consumer_key,
-    consumer_secret: options.twitter.consumer_secret,
-    access_token: options.twitter.access_token,
-    access_token_secret: options.twitter.access_token_secret,
-})
+var T = null
+try {
+    T = new Twit({
+        consumer_key: options.twitter.consumer_key,
+        consumer_secret: options.twitter.consumer_secret,
+        access_token: options.twitter.access_token,
+        access_token_secret: options.twitter.access_token_secret,
+    })
+} catch (e) {
+    console.log('Twitter client unavailable:', e.message)
+}
 
 // GET request to the /settings page (view settings)
 
