@@ -100,6 +100,8 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 
+app.get('/favicon.ico', function(req, res) { res.status(204).end() })
+
 app.get('/', main.render)
 
 
