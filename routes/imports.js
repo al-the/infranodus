@@ -28,8 +28,6 @@ var Evernote = require('evernote')
 
 var S = require('string')
 
-var config = require('../config.json')
-
 var Imap = require('imap'),
     inspect = require('util').inspect
 
@@ -97,10 +95,10 @@ const lemmerRus = new Morphy('ru', {
 //var validator = require('validator'); // to validate encodings, emails, numbers
 
 var T = new Twit({
-    consumer_key: config.twitter.consumer_key,
-    consumer_secret: config.twitter.consumer_secret,
-    access_token: config.twitter.access_token,
-    access_token_secret: config.twitter.access_token_secret,
+    consumer_key: options.twitter.consumer_key,
+    consumer_secret: options.twitter.consumer_secret,
+    access_token: options.twitter.access_token,
+    access_token_secret: options.twitter.access_token_secret,
 })
 
 // GET request to the /settings page (view settings)
@@ -208,7 +206,7 @@ exports.renderEvernote = function(req, res) {
     if (req.session.oauthAccessToken) {
         var client = new Evernote.Client({
             token: req.session.oauthAccessToken,
-            sandbox: config.evernote.SANDBOX,
+            sandbox: options.evernote ? options.evernote.SANDBOX : true,
         })
 
         var noteStore = client.getNoteStore()
@@ -731,7 +729,7 @@ exports.submit = function(req, res, next) {
 
         var client = new Evernote.Client({
             token: req.session.oauthAccessToken,
-            sandbox: config.evernote.SANDBOX,
+            sandbox: options.evernote ? options.evernote.SANDBOX : true,
         })
 
         console.log(req.session.oauthAccessToken)

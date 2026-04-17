@@ -81,6 +81,13 @@ if (fs.existsSync(configPath)) {
     exports.chargebee.api_key = parsed['chargebee']['api_key']
     exports.chargebee.redirect_url = parsed['chargebee']['redirect_url']
 
+    exports.evernote = parsed['evernote'] || null
+    exports.twitter = parsed['twitter'] || {}
+    exports.google = parsed['google'] || {}
+    exports.smtpOptions = parsed['smtpOptions'] || {}
+    exports.mailOptions = parsed['mailOptions'] || {}
+    exports.domain = parsed['infranodus'] ? parsed['infranodus']['domain'] : 'localhost:3000'
+
     exports.rssPresets = parsed['rss_presets']
 } else {
     console.log("Config file doesn't exist. Using environment variables or default settings.")
@@ -97,6 +104,21 @@ if (fs.existsSync(configPath)) {
         api_key: process.env.CHARGEBEE_API_KEY || '',
         redirect_url: process.env.CHARGEBEE_REDIRECT_URL || ''
     }
+
+    exports.evernote = null
+    exports.twitter = {
+        consumer_key: process.env.TWITTER_CONSUMER_KEY || '',
+        consumer_secret: process.env.TWITTER_CONSUMER_SECRET || '',
+        access_token: process.env.TWITTER_ACCESS_TOKEN || '',
+        access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET || ''
+    }
+    exports.google = {
+        URL_search: process.env.GOOGLE_SEARCH_URL || '',
+        API_key: process.env.GOOGLE_API_KEY || ''
+    }
+    exports.smtpOptions = {}
+    exports.mailOptions = {}
+    exports.domain = process.env.INFRANODUS_DOMAIN || 'localhost:3000'
 
     exports.rssPresets = []
 }

@@ -1,7 +1,15 @@
 var Evernote = require('evernote')
 
-var config = require('../config.json')
-var callbackUrl = config.evernote.CALLBACK_URL
+var options = require('../options')
+
+var evernoteConfig = options.evernote || {
+    API_CONSUMER_KEY: process.env.EVERNOTE_KEY || '',
+    API_CONSUMER_SECRET: process.env.EVERNOTE_SECRET || '',
+    CALLBACK_URL: process.env.EVERNOTE_CALLBACK_URL || '',
+    SANDBOX: process.env.EVERNOTE_SANDBOX !== 'false',
+}
+
+var callbackUrl = evernoteConfig.CALLBACK_URL
 
 // home page
 exports.index = function(req, res) {
@@ -9,7 +17,7 @@ exports.index = function(req, res) {
         var token = req.session.oauthAccessToken
         var client = new Evernote.Client({
             token: token,
-            sandbox: config.evernote.SANDBOX,
+            sandbox: evernoteConfig.SANDBOX,
         })
         var noteStore = client.getNoteStore()
         noteStore.listNotebooks(function(err, notebooks) {
@@ -24,9 +32,9 @@ exports.index = function(req, res) {
 // OAuth
 exports.oauth = function(req, res) {
     var client = new Evernote.Client({
-        consumerKey: config.evernote.API_CONSUMER_KEY,
-        consumerSecret: config.evernote.API_CONSUMER_SECRET,
-        sandbox: config.evernote.SANDBOX,
+        consumerKey: evernoteConfig.API_CONSUMER_KEY,
+        consumerSecret: evernoteConfig.API_CONSUMER_SECRET,
+        sandbox: evernoteConfig.SANDBOX,
     })
 
     client.getRequestToken(callbackUrl, function(
@@ -53,9 +61,9 @@ exports.oauth = function(req, res) {
 // OAuth callback
 exports.oauth_callback = function(req, res) {
     var client = new Evernote.Client({
-        consumerKey: config.evernote.API_CONSUMER_KEY,
-        consumerSecret: config.evernote.API_CONSUMER_SECRET,
-        sandbox: config.evernote.SANDBOX,
+        consumerKey: evernoteConfig.API_CONSUMER_KEY,
+        consumerSecret: evernoteConfig.API_CONSUMER_SECRET,
+        sandbox: evernoteConfig.SANDBOX,
     })
 
     client.getAccessToken(

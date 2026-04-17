@@ -1,7 +1,6 @@
 var validate = require('../lib/middleware/validate')
 var entries = require('../routes/entries')
 var options = require('../options')
-var config = require('../config.json')
 const https = require('https');
 
 var max_length = options.settings.max_text_length
@@ -10,27 +9,30 @@ var max_file_length = options.settings.max_file_length
 
 
 // Lemmatizer module initialization
-const Morphy = require('phpmorphy-locutus').default
+var lemmerEng = null
+var lemmerRus = null
 
-const lemmerEng = new Morphy('en', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
-
-const lemmerRus = new Morphy('ru', {
-    //  nojo:                false,
-    storage: Morphy.STORAGE_MEM,
-    predict_by_suffix: true,
-    predict_by_db: true,
-    graminfo_as_text: true,
-    use_ancodes_cache: false,
-    resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
-})
+try {
+    const Morphy = require('phpmorphy-locutus').default
+    lemmerEng = new Morphy('en', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+    lemmerRus = new Morphy('ru', {
+        storage: Morphy.STORAGE_MEM,
+        predict_by_suffix: true,
+        predict_by_db: true,
+        graminfo_as_text: true,
+        use_ancodes_cache: false,
+        resolve_ancodes: Morphy.RESOLVE_ANCODES_AS_TEXT,
+    })
+} catch (e) {
+    console.log('phpmorphy-locutus unavailable in importgoogle:', e.message)
+}
 
 // GET request to the /google page (view settings)
 
@@ -170,7 +172,7 @@ exports.submitGoogle = function(req, res, next) {
                 }
 
 
-                let google_request_link = config.google.URL_search + config.google.API_key + '&q=' + searchString.toLowerCase();
+                let google_request_link = options.google.URL_search + options.google.API_key + '&q=' + searchString.toLowerCase();
 
                 https.get(google_request_link, (resp) => {
 
@@ -272,16 +274,16 @@ exports.submitGoogle = function(req, res, next) {
                                                                         /[а-яА-ЯЁё]/.test(searchterms[k]) ==
                                                                         true
                                                                     ) {
-                                                                        var lemmaterm = lemmerRus.lemmatize(
+                                                                        var lemmaterm = lemmerRus ? lemmerRus.lemmatize(
                                                                             searchterms[k]
-                                                                        )
+                                                                        ) : [searchterms[k]]
                                                                     }
 
                                                                     // English?
                                                                     else {
-                                                                        var lemmaterm = lemmerEng.lemmatize(
+                                                                        var lemmaterm = lemmerEng ? lemmerEng.lemmatize(
                                                                             searchterms[k]
-                                                                        )
+                                                                        ) : [searchterms[k]]
 
                                                                     }
 

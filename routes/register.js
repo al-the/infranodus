@@ -25,7 +25,6 @@ var validate = require('../lib/middleware/validate')
 
 var bcrypt = require('bcrypt-nodejs')
 
-var config = require('../config.json')
 
 const nodemailer = require('nodemailer')
 
@@ -210,21 +209,21 @@ exports.generatehash = function(req, res, next) {
             ) {
                 console.log('starting mailer')
                 const transporter = nodemailer.createTransport(
-                    config.smtpOptions
+                    options.smtpOptions
                 )
 
-                config.mailOptions.to = user.portal
-                config.mailOptions.subject =
+                options.mailOptions.to = user.portal
+                options.mailOptions.subject =
                     'Password Recovery Link for InfraNodus.Com'
-                config.mailOptions.text =
+                options.mailOptions.text =
                     "Hello, \n\nWe have received a request to reset your password. \n\nIf you haven't made this request, please, ignore this message. If you did, please, click the link below to create a new password. \n\n Your username: " +
                     user.substance +
                     '\n\nYour password reset link: http://' +
-                    config.infranodus.domain +
+                    options.domain +
                     resetLink +
                     '\n\nThank you,\n\nInfraNodus Bot'
 
-                transporter.sendMail(config.mailOptions, function(err, ress) {
+                transporter.sendMail(options.mailOptions, function(err, ress) {
                     if (err) {
                         console.log('there was an error: ', err)
                         res.send({
